@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coach — Personal Trainer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">C</div>
+        <div>
+          <div class="brand-name">Coach</div>
+          <div class="brand-sub">Your personal trainer</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-btn active" data-view="chat">
+          <span class="nav-icon">💬</span> Chat
+        </button>
+        <button class="nav-btn" data-view="workouts">
+          <span class="nav-icon">🏋️</span> Workouts
+        </button>
+        <button class="nav-btn" data-view="progress">
+          <span class="nav-icon">📈</span> Progress
+        </button>
+        <button class="nav-btn" data-view="profile">
+          <span class="nav-icon">👤</span> Profile
+        </button>
+        <button class="nav-btn" data-view="settings">
+          <span class="nav-icon">⚙️</span> Settings
+        </button>
+      </nav>
+
+      <div class="streak-card">
+        <div class="streak-num" id="streakNum">0</div>
+        <div class="streak-label">day streak</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- Chat view -->
+      <section class="view active" data-view="chat">
+        <header class="view-header">
+          <h1>Chat with Coach</h1>
+          <div class="header-actions">
+            <button class="btn-ghost" id="clearChatBtn">Clear</button>
+          </div>
+        </header>
+        <div class="chat-wrapper">
+          <div class="messages" id="messages"></div>
+          <div class="composer">
+            <textarea id="chatInput" rows="1" placeholder="Ask Coach for a plan, log a workout, or talk through soreness…"></textarea>
+            <button id="sendBtn" class="btn-primary">Send</button>
+          </div>
+          <div class="quick-actions">
+            <button class="chip" data-prompt="Build me a workout for today based on my goals.">Today's workout</button>
+            <button class="chip" data-prompt="My legs are sore from yesterday. What should I do?">I'm sore</button>
+            <button class="chip" data-prompt="Give me a 4-week plan to hit my goals.">4-week plan</button>
+            <button class="chip" data-prompt="What should I eat after my workout?">Post-workout food</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Workouts view -->
+      <section class="view" data-view="workouts">
+        <header class="view-header">
+          <h1>Workouts</h1>
+          <div class="header-actions">
+            <button class="btn-primary" id="newWorkoutBtn">+ New workout</button>
+          </div>
+        </header>
+        <div class="workouts-list" id="workoutsList"></div>
+      </section>
+
+      <!-- Progress view -->
+      <section class="view" data-view="progress">
+        <header class="view-header">
+          <h1>Progress</h1>
+        </header>
+        <div class="progress-grid">
+          <div class="card">
+            <div class="card-title">This week</div>
+            <div class="metric-row">
+              <div class="metric"><div class="metric-num" id="weekWorkouts">0</div><div class="metric-label">workouts</div></div>
+              <div class="metric"><div class="metric-num" id="weekVolume">0</div><div class="metric-label">total volume (kg)</div></div>
+              <div class="metric"><div class="metric-num" id="weekMinutes">0</div><div class="metric-label">minutes</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Workouts over time</div>
+            <canvas id="freqChart" height="160"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-title">Top lift progression</div>
+            <select id="liftSelect" class="select"></select>
+            <canvas id="liftChart" height="180"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Profile view -->
+      <section class="view" data-view="profile">
+        <header class="view-header">
+          <h1>Profile</h1>
+        </header>
+        <form class="form card" id="profileForm">
+          <div class="form-row">
+            <label>Name<input type="text" name="name" placeholder="Alex" /></label>
+            <label>Age<input type="number" name="age" min="10" max="100" /></label>
+          </div>
+          <div class="form-row">
+            <label>Sex
+              <select name="sex">
+                <option value="">—</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <label>Height (cm)<input type="number" name="height" /></label>
+            <label>Weight (kg)<input type="number" name="weight" step="0.1" /></label>
+          </div>
+          <div class="form-row">
+            <label>Experience
+              <select name="experience">
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </label>
+            <label>Days per week
+              <input type="number" name="frequency" min="1" max="7" value="3" />
+            </label>
+          </div>
+          <label>Primary goal
+            <select name="goal">
+              <option value="strength">Build strength</option>
+              <option value="muscle">Gain muscle</option>
+              <option value="fatloss">Lose fat</option>
+              <option value="endurance">Endurance</option>
+              <option value="general">General fitness</option>
+            </select>
+          </label>
+          <label>Equipment available
+            <input type="text" name="equipment" placeholder="Full gym, dumbbells, bodyweight only…" />
+          </label>
+          <label>Notes / injuries
+            <textarea name="notes" rows="3" placeholder="Bad knee, left shoulder mobility, prefers mornings…"></textarea>
+          </label>
+          <button class="btn-primary" type="submit">Save profile</button>
+          <div class="save-status" id="profileStatus"></div>
+        </form>
+      </section>
+
+      <!-- Settings view -->
+      <section class="view" data-view="settings">
+        <header class="view-header">
+          <h1>Settings</h1>
+        </header>
+        <div class="card">
+          <div class="card-title">Claude API key</div>
+          <p class="muted">Coach uses Anthropic's Claude. Your key is stored in your browser only and sent directly to Anthropic.</p>
+          <div class="form-row">
+            <label style="flex:1">
+              <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
+            </label>
+            <button class="btn-primary" id="saveKeyBtn">Save</button>
+          </div>
+          <div class="form-row" style="margin-top:8px">
+            <label style="flex:1">Model
+              <select id="modelSelect">
+                <option value="claude-opus-4-7">Opus 4.7 — most capable</option>
+                <option value="claude-sonnet-4-6" selected>Sonnet 4.6 — balanced</option>
+                <option value="claude-haiku-4-5-20251001">Haiku 4.5 — fastest</option>
+              </select>
+            </label>
+          </div>
+          <div class="save-status" id="keyStatus"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Units</div>
+          <div class="form-row">
+            <label>
+              <select id="unitsSelect">
+                <option value="kg">Kilograms</option>
+                <option value="lb">Pounds</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Data</div>
+          <p class="muted">All your data lives in this browser. Export it to keep a copy.</p>
+          <div class="row-actions">
+            <button class="btn-ghost" id="exportBtn">Export data</button>
+            <button class="btn-ghost" id="importBtn">Import data</button>
+            <input type="file" id="importFile" accept="application/json" style="display:none" />
+            <button class="btn-danger" id="resetBtn">Reset everything</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Workout editor modal -->
+  <div class="modal" id="workoutModal" hidden>
+    <div class="modal-card">
+      <header class="modal-header">
+        <h2 id="workoutModalTitle">New workout</h2>
+        <button class="btn-ghost" id="closeWorkoutBtn">✕</button>
+      </header>
+      <div class="modal-body">
+        <div class="form-row">
+          <label>Date<input type="date" id="workoutDate" /></label>
+          <label>Duration (min)<input type="number" id="workoutDuration" min="0" /></label>
+        </div>
+        <label>Title<input type="text" id="workoutTitle" placeholder="Push day, Leg day, 5k run…" /></label>
+        <div class="exercises" id="exercisesList"></div>
+        <button class="btn-ghost" id="addExerciseBtn">+ Add exercise</button>
+        <label>Notes<textarea id="workoutNotes" rows="2" placeholder="Felt strong, bumped weight on bench…"></textarea></label>
+      </div>
+      <footer class="modal-footer">
+        <button class="btn-ghost" id="deleteWorkoutBtn" hidden>Delete</button>
+        <div style="flex:1"></div>
+        <button class="btn-ghost" id="cancelWorkoutBtn">Cancel</button>
+        <button class="btn-primary" id="saveWorkoutBtn">Save</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
