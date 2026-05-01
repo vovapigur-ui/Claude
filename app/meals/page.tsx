@@ -120,11 +120,11 @@ export default function MealsPage() {
   };
 
   const toggleMeal = useCallback(
-    async (id: MealLog[keyof MealLog] extends boolean ? keyof MealLog : never) => {
+    async (id: string) => {
       const current = await getOrCreateDailyLog(date);
       await db.dailyLogs.put({
         ...current,
-        meals: { ...current.meals, [id]: !current.meals[id as keyof MealLog] },
+        meals: { ...current.meals, [id]: !current.meals[id] },
       });
       navigator.vibrate?.(20);
     },
@@ -206,7 +206,7 @@ export default function MealsPage() {
             key={meal.id}
             meal={meal}
             eaten={meals[meal.id] ?? false}
-            onToggle={(id) => toggleMeal(id as Parameters<typeof toggleMeal>[0])}
+            onToggle={(id) => toggleMeal(id)}
           />
         ))}
       </div>
