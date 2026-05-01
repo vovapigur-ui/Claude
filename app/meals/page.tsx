@@ -99,7 +99,10 @@ export default function MealsPage() {
     initSettings().then(() => setReady(true));
   }, []);
 
-  const dailyLog = useLiveQuery(() => db?.dailyLogs?.get?.(date), [date]);
+  const dailyLog = useLiveQuery(
+    () => (typeof window !== 'undefined' ? db.dailyLogs.get(date) : undefined),
+    [date]
+  );
 
   const meals = dailyLog?.meals ?? { ...defaultMeals };
   const dayIndex = getDayOfWeek(date);

@@ -13,7 +13,7 @@ import {
   defaultMeals,
   defaultHabits,
 } from '@/lib/db';
-import type { HabitLog } from '@/lib/db';
+import type { HabitLog, DailyLog } from '@/lib/db';
 import {
   todayStr,
   getDayName,
@@ -50,18 +50,25 @@ export default function TodayPage() {
     initSettings().then(() => setReady(true));
   }, []);
 
-  const dailyLog = useLiveQuery(() => db?.dailyLogs?.get?.(date), [date]);
-  const settings = useLiveQuery(() => db?.settings?.get?.(1));
+  // Guard all queries with typeof window — prevents empty subscriptions during SSR
+  const dailyLog = useLiveQuery(
+    () => (typeof window !== 'undefined' ? db.dailyLogs.get(date) : undefined),
+    [date]
+  );
+  const settings = useLiveQuery(
+    () => (typeof window !== 'undefined' ? db.settings.get(1) : undefined)
+  );
   const recentLogs = useLiveQuery(
-    () => db?.dailyLogs?.orderBy?.('date').reverse().limit(60).toArray(),
+    () =>
+      typeof window !== 'undefined'
+        ? db.dailyLogs.orderBy('date').reverse().limit(60).toArray()
+        : Promise.resolve([] as DailyLog[]),
     []
   );
 
-  const currentWeight =
-    recentLogs?.find((l) => l.weight !== null)?.weight ??
-    settings?.startWeight ??
-    206;
   const startWeight = settings?.startWeight ?? 206;
+  const currentWeight =
+    recentLogs?.find((l) => l.weight !== null)?.weight ?? startWeight;
   const lbsLost = startWeight - currentWeight;
 
   useEffect(() => {
@@ -120,8 +127,8 @@ export default function TodayPage() {
       : completionPct >= 50
       ? 'HALFWAY DONE'
       : completionPct > 0
-      ? 'KEEP PUSHING'
-      : 'LET\'S GET IT';
+      ? "KEEP PUSHING"
+      : "LET'S GET IT";
 
   if (!ready) {
     return (
@@ -198,11 +205,12 @@ export default function TodayPage() {
           </CompletionRing>
         </div>
 
-        {/* Mini streak bar */}
+        {/* Mini progress bar */}
         <div className="mt-4 flex gap-1.5">
           {[...Array(12)].map((_, i) => {
             const filled =
-              i < Object.values(log.habits).filter(Boolean).length +
+              i <
+              Object.values(log.habits).filter(Boolean).length +
                 Object.values(log.meals).filter(Boolean).length +
                 (log.workoutCompleted ? 1 : 0);
             return (
@@ -274,8 +282,8 @@ export default function TodayPage() {
                 onClick={() => toggleHabit(key)}
                 className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 active:scale-[0.99] ${
                   checked
-                    ? 'bg-yellow-400/8 border border-yellow-400/20 glow-sm'
-                    : 'bg-zinc-800/60 border border-transparent hover:border-zinc-700'
+                    ? 'bg-yellow-400/8 border border-yellow-400/20'
+                    : 'bg-zinc-800/60 border border-transparent'
                 }`}
               >
                 <span className="text-xl w-7 shrink-0 text-center">{emoji}</span>

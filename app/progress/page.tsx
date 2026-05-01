@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, initSettings } from '@/lib/db';
+import type { DailyLog } from '@/lib/db';
 import { sevenDayAverage } from '@/lib/utils';
 import { WeightChart, type ChartDataPoint } from '@/components/WeightChart';
 
@@ -15,9 +16,14 @@ export default function ProgressPage() {
     initSettings().then(() => setReady(true));
   }, []);
 
-  const settings = useLiveQuery(() => db?.settings?.get?.(1));
+  const settings = useLiveQuery(
+    () => (typeof window !== 'undefined' ? db.settings.get(1) : undefined)
+  );
   const allLogs = useLiveQuery(
-    () => db?.dailyLogs?.orderBy?.('date').toArray(),
+    () =>
+      typeof window !== 'undefined'
+        ? db.dailyLogs.orderBy('date').toArray()
+        : Promise.resolve([] as DailyLog[]),
     []
   );
 

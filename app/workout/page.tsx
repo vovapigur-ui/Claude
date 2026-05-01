@@ -117,21 +117,27 @@ function ExerciseCard({ exercise, logEntry, onWeightChange, onRepChange, onToggl
 export default function WorkoutPage() {
   const [date, setDate] = useState(todayStr());
   const [activeWeek, setActiveWeek] = useState<1 | 2>(1);
+  const [weekManuallySet, setWeekManuallySet] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     initSettings().then(() => setReady(true));
   }, []);
 
-  const settings = useLiveQuery(() => db?.settings?.get?.(1));
-  const workoutLog = useLiveQuery(() => db?.workoutLogs?.get?.(date), [date]);
+  const settings = useLiveQuery(
+    () => (typeof window !== 'undefined' ? db.settings.get(1) : undefined)
+  );
+  const workoutLog = useLiveQuery(
+    () => (typeof window !== 'undefined' ? db.workoutLogs.get(date) : undefined),
+    [date]
+  );
 
-  // Auto-detect week from start date
+  // Auto-detect week from start date — skip if user manually changed it
   useEffect(() => {
-    if (settings?.startDate) {
+    if (!weekManuallySet && settings?.startDate) {
       setActiveWeek(getWeekNumber(settings.startDate));
     }
-  }, [settings?.startDate]);
+  }, [settings?.startDate, weekManuallySet]);
 
   const dayIndex = getDayOfWeek(date);
   const workout = getWorkoutForDay(dayIndex, activeWeek);
@@ -140,14 +146,15 @@ export default function WorkoutPage() {
   // Initialize workout log when date/week changes
   useEffect(() => {
     if (!ready || isRestDay) return;
-    const defaultExercises: WorkoutExercise[] = workout.exercises.map((ex) => ({
+    const w = getWorkoutForDay(getDayOfWeek(date), activeWeek);
+    const defaultExercises: WorkoutExercise[] = w.exercises.map((ex) => ({
       exerciseId: ex.id,
       weight: ex.defaultWeight,
       setsCompleted: Array(ex.sets).fill(''),
       done: false,
     }));
     getOrCreateWorkoutLog(date, defaultExercises);
-  }, [date, activeWeek, ready, isRestDay, workout.exercises]);
+  }, [date, activeWeek, ready, isRestDay]);
 
   const getLogEntry = (exerciseId: string): WorkoutExercise | undefined =>
     workoutLog?.exercises.find((e) => e.exerciseId === exerciseId);
@@ -220,7 +227,7 @@ export default function WorkoutPage() {
             {([1, 2] as const).map((w) => (
               <button
                 key={w}
-                onClick={() => setActiveWeek(w)}
+                onClick={() => { setActiveWeek(w); setWeekManuallySet(true); }}
                 className={`px-3 py-1.5 rounded-lg font-mono text-xs uppercase tracking-widest transition-all duration-200 ${
                   activeWeek === w
                     ? 'bg-yellow-400 text-zinc-950 font-bold'
