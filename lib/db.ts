@@ -66,16 +66,23 @@ class RecompDB extends Dexie {
   }
 }
 
-// Safe SSR: only instantiate on client
-let _db: RecompDB | null = null;
+// Lazy singleton — never instantiated on the server
+let _instance: RecompDB | null = null;
 
-function getDB(): RecompDB {
-  if (!_db) _db = new RecompDB();
-  return _db;
+function getInstance(): RecompDB {
+  if (!_instance) {
+    _instance = new RecompDB();
+  }
+  return _instance;
 }
 
-export const db: RecompDB =
-  typeof window !== 'undefined' ? getDB() : ({} as RecompDB);
+// Proxy that defers all property access until client-side
+export const db = new Proxy({} as RecompDB, {
+  get(_target, prop) {
+    if (typeof window === 'undefined') return undefined;
+    return getInstance()[prop as keyof RecompDB];
+  },
+});
 
 export const defaultMeals: MealLog = {
   preworkout: false,
@@ -107,7 +114,7 @@ const DEFAULT_SETTINGS: AppSettings = {
 
 export async function initSettings(): Promise<void> {
   if (typeof window === 'undefined') return;
-  const d = getDB();
+  const d = getInstance();
   const existing = await d.settings.get(1);
   if (!existing) {
     await d.settings.put(DEFAULT_SETTINGS);
@@ -115,7 +122,7 @@ export async function initSettings(): Promise<void> {
 }
 
 export async function getOrCreateDailyLog(date: string): Promise<DailyLog> {
-  const d = getDB();
+  const d = getInstance();
   const existing = await d.dailyLogs.get(date);
   if (existing) return existing;
   const newLog: DailyLog = {
@@ -134,7 +141,7 @@ export async function getOrCreateWorkoutLog(
   date: string,
   defaultExercises: WorkoutExercise[] = []
 ): Promise<WorkoutLog> {
-  const d = getDB();
+  const d = getInstance();
   const existing = await d.workoutLogs.get(date);
   if (existing) return existing;
   const newLog: WorkoutLog = { date, exercises: defaultExercises };
