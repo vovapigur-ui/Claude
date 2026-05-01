@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background-color: #09090b;
+    color: #f4f4f5;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: none;
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer utilities {
+  .grid-pattern {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .glow-yellow {
+    box-shadow: 0 0 28px rgba(250, 204, 21, 0.28), 0 0 56px rgba(250, 204, 21, 0.08);
+  }
+
+  .glow-sm {
+    box-shadow: 0 0 12px rgba(250, 204, 21, 0.2);
+  }
+
+  .font-archivo {
+    font-family: var(--font-archivo), sans-serif;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono), monospace;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
