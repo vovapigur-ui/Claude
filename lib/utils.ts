@@ -10,62 +10,45 @@ export function addDaysToDate(dateStr: string, days: number): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-export function getDayOfWeek(dateStr: string): number {
+/** Whole days from today to dateStr. Negative = in the past (overdue). */
+export function daysUntil(dateStr: string): number {
   const [y, m, day] = dateStr.split('-').map(Number);
-  return new Date(y, m - 1, day).getDay();
+  const target = new Date(y, m - 1, day).getTime();
+  const t = todayStr().split('-').map(Number);
+  const now = new Date(t[0], t[1] - 1, t[2]).getTime();
+  return Math.round((target - now) / 86400000);
 }
 
-export function getDayName(dateStr: string): string {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  return days[getDayOfWeek(dateStr)];
+/** Whole days since dateStr (positive = in the past). */
+export function daysSince(dateStr: string): number {
+  return -daysUntil(dateStr);
 }
 
 export function formatDate(dateStr: string): string {
   const [y, m, day] = dateStr.split('-').map(Number);
   return new Date(y, m - 1, day).toLocaleDateString('en-US', {
-    weekday: 'short',
     month: 'short',
     day: 'numeric',
   });
 }
 
-export function formatShortDate(dateStr: string): string {
-  const [, m, day] = dateStr.split('-').map(Number);
-  return `${m}/${day}`;
+/** "in 3d", "today", "2d ago" style relative label. */
+export function relativeDateLabel(dateStr: string): string {
+  const d = daysUntil(dateStr);
+  if (d === 0) return 'today';
+  if (d === 1) return 'tomorrow';
+  if (d === -1) return 'yesterday';
+  if (d > 0) return `in ${d}d`;
+  return `${-d}d ago`;
+}
+
+export function formatPrice(n: number): string {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 2)}M`;
+  return `$${Math.round(n / 1000)}K`;
 }
 
 export function isToday(dateStr: string): boolean {
   return dateStr === todayStr();
-}
-
-export function calculateCompletionPercent(
-  meals: { [key: string]: boolean },
-  habits: { [key: string]: boolean },
-  workoutCompleted: boolean
-): number {
-  const mealCount = Object.values(meals).filter(Boolean).length;
-  const habitCount = Object.values(habits).filter(Boolean).length;
-  const total = mealCount + habitCount + (workoutCompleted ? 1 : 0);
-  return Math.round((total / 12) * 100);
-}
-
-export function getWeekNumber(startDateStr: string): 1 | 2 {
-  const [sy, sm, sd] = startDateStr.split('-').map(Number);
-  const start = new Date(sy, sm - 1, sd);
-  const today = new Date();
-  const diffDays = Math.max(0, Math.floor((today.getTime() - start.getTime()) / 86400000));
-  return ((Math.floor(diffDays / 7) % 2) + 1) as 1 | 2;
-}
-
-export function sevenDayAverage(
-  logs: { date: string; weight: number | null }[]
-): number | null {
-  const withWeight = logs
-    .filter((l) => l.weight !== null)
-    .slice(-7)
-    .map((l) => l.weight as number);
-  if (withWeight.length === 0) return null;
-  return withWeight.reduce((a, b) => a + b, 0) / withWeight.length;
 }
 
 export function cn(...classes: (string | undefined | null | false)[]): string {

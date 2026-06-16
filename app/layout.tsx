@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Archivo, JetBrains_Mono, Inter } from 'next/font/google';
 import './globals.css';
 import BottomNav from '@/components/BottomNav';
+import ToastHost from '@/components/Toast';
 
 const archivo = Archivo({
   subsets: ['latin'],
@@ -24,13 +25,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'RECOMP',
-  description: 'Body recomposition tracker — 206 → 175',
+  title: 'APEX — Producer OS',
+  description: 'The command center for top-producing real estate agents',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'RECOMP',
+    title: 'APEX',
   },
   formatDetection: { telephone: false },
   other: {
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="max-w-[428px] mx-auto relative min-h-screen">
           <main className="pb-24">{children}</main>
           <BottomNav />
+          <ToastHost />
         </div>
         <script
           dangerouslySetInnerHTML={{

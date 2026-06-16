@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CalendarDays, Dumbbell, UtensilsCrossed, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Users, UserCog } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const tabs = [
-  { href: '/today', label: 'Today', icon: CalendarDays },
-  { href: '/workout', label: 'Workout', icon: Dumbbell },
-  { href: '/meals', label: 'Meals', icon: UtensilsCrossed },
-  { href: '/progress', label: 'Progress', icon: TrendingUp },
+  { href: '/', label: 'Today', icon: LayoutDashboard },
+  { href: '/pipeline', label: 'Pipeline', icon: Briefcase },
+  { href: '/sphere', label: 'Sphere', icon: Users },
+  { href: '/profile', label: 'Profile', icon: UserCog },
 ] as const;
 
 export default function BottomNav() {
@@ -22,7 +22,7 @@ export default function BottomNav() {
     >
       <div className="max-w-[428px] mx-auto flex">
         {tabs.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href;
+          const active = href === '/' ? pathname === '/' : pathname.startsWith(href);
           return (
             <Link
               key={href}
